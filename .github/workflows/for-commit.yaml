@@ -22,8 +22,10 @@ jobs:
         with:
           node-version: '14'
 
+      - name: Install Sucrase
+        run: npm install sucrase
+        
       - name: Install All Dependencies
-        run: npm install --save-dev sucrase
         run: npm install
 
       - name: Run Tests
