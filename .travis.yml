@@ -1,7 +1,0 @@
-language: shell
-services:
-  - docker
-
-script:
-  - docker build -t my-project .
-  - docker run my-project
