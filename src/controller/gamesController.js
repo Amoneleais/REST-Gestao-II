@@ -19,7 +19,7 @@ const games = [
 const gamesController = {
     getAll: async (req, res) => {
         try {
-            return res.send(games);
+            return res.status(201).send(games);
         } catch (err) {
             return res.status(500).send("Internal Server Error");
         }
