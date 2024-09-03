@@ -9,17 +9,13 @@ Vagrant.configure("2") do |config|
 
     vm1.vm.provision "shell", inline: <<-SHELL
       sudo apt update && sudo apt -y upgrade
-      sudo apt install software-properties-common sshpass -y
-      sudo apt install pipx
-      pipx ensurepath
-      sudo pipx ensurepath --global
-      sudo pipx install --include-deps ansible
+      sudo apt install software-properties-common
+      sudo add-apt-repository --yes --update ppa:ansible/ansible
+      sudo apt install ansible
       if [ ! -f /home/vagrant/.ssh/id_rsa ]; then
         ssh-keygen -t rsa -b 4096 -f /home/vagrant/.ssh/id_rsa -N ""
       fi
       SHELL
-
-      vm1.vm.provision :shell, :inline => "sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config; sudo systemctl restart sshd;", run: "always"
   end
 
   config.vm.define "vm2" do |vm2|
@@ -28,6 +24,5 @@ Vagrant.configure("2") do |config|
     vm2.vm.provider "virtualbox" do |vb|
       vb.memory = 1024
     end
-    vm2.vm.provision :shell, :inline => "sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config; sudo systemctl restart sshd;", run: "always"
   end
 end
