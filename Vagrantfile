@@ -9,17 +9,14 @@ Vagrant.configure("2") do |config|
 
     vm1.vm.provision "shell", inline: <<-SHELL
       sudo apt update && sudo apt -y upgrade
-      sudo apt install software-properties-common
+      sudo apt install software-properties-common sshpass -y
       sudo apt install pipx
       pipx ensurepath
       sudo pipx ensurepath --global
       sudo pipx install --include-deps ansible
-
-      ssh-keygen -t rsa -b 4096 -N '' -f /home/vagrant/.ssh/id_rsa
-      cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
-      chmod 600 /home/vagrant/.ssh/authorized_keys
-
-      sshpass -p 'vagrant' ssh-copy-id -o StrictHostKeyChecking=no vagrant@192.168.33.11
+      if [ ! -f /home/vagrant/.ssh/id_rsa ]; then
+        ssh-keygen -t rsa -b 4096 -f /home/vagrant/.ssh/id_rsa -N ""
+      fi
     SHELL
   end
 
@@ -31,10 +28,10 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  config.vm.define "vm2" do |vm2|
-    vm2.trigger.after :up do
-      run "vagrant ssh vm1 -c 'sshpass -p \"vagrant\" ssh-copy-id -o StrictHostKeyChecking=no vagrant@192.168.33.11'"
-    end
+  config.vm.define "vm1" do |vm1|
+    vm1.vm.provision "shell", inline: <<-SHELL
+      sshpass -p "vagrant" ssh-copy-id -i /home/vagrant/.ssh/id_rsa.pub -o StrictHostKeyChecking=no vagrant@192.168.33.11
+    SHELL, run: "always"
   end
 
 end
