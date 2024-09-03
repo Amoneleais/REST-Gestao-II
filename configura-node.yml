@@ -26,5 +26,11 @@
         state: present
     
     - name: 'Instalar dependências da aplicação'
-      npm:
-        path: '/home/vagrant/gc2'
+      command: 'npm install'
+      args:
+        chdir: '/home/vagrant/gc2'
+
+    - name: 'Executar aplicação'
+      command: 'npm start'
+      args:
+        chdir: '/home/vagrant/gc2'
