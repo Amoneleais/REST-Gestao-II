@@ -1,0 +1,8 @@
+[controle]
+192.168.33.10
+
+[gerenciado]
+192.168.33.11
+
+[gerenciado:vars]
+ansible_password=vagrant
