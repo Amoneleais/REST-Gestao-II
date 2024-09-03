@@ -2,10 +2,8 @@
 
 - name: 'Configura NodeJs'
   hosts: gerenciado
-  connection: ssh
-  gather_facts: false
-  connection: network_cli
-
+  become: yes
+  
   tasks:
     - name: 'Certificar que o Git está instalado'
       apt:
