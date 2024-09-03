@@ -1,7 +1,7 @@
 ---
 
 - name: 'Configura NodeJs'
-  hosts: managed
+  hosts: gerenciado
   connection: ssh
   gather_facts: false
   connection: network_cli
@@ -21,10 +21,12 @@
         force: yes
     
     - name: 'Instalar NodeJs'
-      shell: |
-        curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs
+      apt:
+        name:
+          - nodejs
+          - npm
+        state: present
     
     - name: 'Instalar dependências da aplicação'
       npm:
         path: '/home/vagrant/gc2'
-        state: present

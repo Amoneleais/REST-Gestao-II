@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
     vm1.vm.provider "virtualbox" do |vb|
       vb.memory = 1024
     end
-    vm1.vm.synced_folder "./", "/vagrant_data"
+    vm1.vm.synced_folder "./", "/opt/vagrant/"
 
     vm1.vm.provision "shell", inline: <<-SHELL
       sudo apt update && sudo apt -y upgrade
@@ -17,7 +17,9 @@ Vagrant.configure("2") do |config|
       if [ ! -f /home/vagrant/.ssh/id_rsa ]; then
         ssh-keygen -t rsa -b 4096 -f /home/vagrant/.ssh/id_rsa -N ""
       fi
-    SHELL
+      SHELL
+
+      vm1.vm.provision :shell, :inline => "sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config; sudo systemctl restart sshd;", run: "always"
   end
 
   config.vm.define "vm2" do |vm2|
@@ -26,12 +28,6 @@ Vagrant.configure("2") do |config|
     vm2.vm.provider "virtualbox" do |vb|
       vb.memory = 1024
     end
+    vm2.vm.provision :shell, :inline => "sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config; sudo systemctl restart sshd;", run: "always"
   end
-
-  config.vm.define "vm1" do |vm1|
-    vm1.vm.provision "shell", inline: <<-SHELL
-      sshpass -p "vagrant" ssh-copy-id -i /home/vagrant/.ssh/id_rsa.pub -o StrictHostKeyChecking=no vagrant@192.168.33.11
-    SHELL, run: "always"
-  end
-
 end
