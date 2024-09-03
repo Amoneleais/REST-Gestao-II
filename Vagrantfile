@@ -5,28 +5,36 @@ Vagrant.configure("2") do |config|
     vm1.vm.provider "virtualbox" do |vb|
       vb.memory = 1024
     end
+    vm1.vm.synced_folder "./", "/vagrant_data"
+
+    vm1.vm.provision "shell", inline: <<-SHELL
+      sudo apt update && sudo apt -y upgrade
+      sudo apt install software-properties-common
+      sudo apt install pipx
+      pipx ensurepath
+      sudo pipx ensurepath --global
+      sudo pipx install --include-deps ansible
+
+      ssh-keygen -t rsa -b 4096 -N '' -f /home/vagrant/.ssh/id_rsa
+      cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
+      chmod 600 /home/vagrant/.ssh/authorized_keys
+
+      sshpass -p 'vagrant' ssh-copy-id -o StrictHostKeyChecking=no vagrant@192.168.33.11
+    SHELL
   end
 
   config.vm.define "vm2" do |vm2|
     vm2.vm.box = "ubuntu/jammy64"
     vm2.vm.network "private_network", ip: "192.168.33.11"
-    
-    # Use NFS para hosts Linux/Mac
-      vm2.vm.synced_folder ".", "/vagrant_data", type: "nfs"
-
-    # Descomente a linha seguinte e comente a linha acima se você estiver no Windows
-    # vm2.vm.synced_folder ".", "/vagrant_data", type: "smb"
-
     vm2.vm.provider "virtualbox" do |vb|
-      vb.memory = 4096
+      vb.memory = 1024
     end
-
-    vm2.vm.provision "shell", inline: <<-SHELL
-      curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-      sudo apt-get install -y nodejs
-      cd /vagrant_data
-      npm install
-      npm start &
-    SHELL
   end
+
+  config.vm.define "vm2" do |vm2|
+    vm2.trigger.after :up do
+      run "vagrant ssh vm1 -c 'sshpass -p \"vagrant\" ssh-copy-id -o StrictHostKeyChecking=no vagrant@192.168.33.11'"
+    end
+  end
+
 end
